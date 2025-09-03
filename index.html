@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8th Grade ELA Standards Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        #background-container.visible {
+            opacity: 1;
+        }
+        .bg-element {
+            position: absolute;
+            font-size: 50px;
+            color: rgba(100, 116, 139, 0.1);
+            animation: drift 40s linear infinite;
+        }
+        @keyframes drift {
+            0% { transform: translateY(110vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        .standard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .standard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tutor-chat-bubble {
+            background-color: #e2e8f0;
+            border-radius: 20px 20px 20px 5px;
+            position: relative;
+        }
+        .user-chat-bubble {
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 20px 20px 5px 20px;
+        }
+        .chat-container {
+            height: calc(100vh - 300px);
+        }
+        .gemini-button {
+            background-color: #c4b5fd;
+            color: #4f46e5;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+        .gemini-button:hover {
+            background-color: #a78bfa;
+        }
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="background-container"></div>
+
+    <div id="app" class="relative z-10">
+        <!-- Main Dashboard -->
+        <div id="dashboard" class="container mx-auto p-4 md:p-8">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-900">8th Grade ELA Standards Tutor</h1>
+                <p class="mt-2 text-lg text-gray-600">Your personal guide to mastering English Language Arts!</p>
+            </header>
+            <div id="standards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Standard cards will be injected here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Tutor Module -->
+        <div id="tutor-module" class="hidden">
+            <header class="bg-white/80 backdrop-blur-sm shadow-sm p-4 flex items-center sticky top-0 z-20">
+                <button id="back-to-dashboard" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h2 id="module-title" class="text-2xl font-bold text-gray-900 ml-4"></h2>
+            </header>
+            <main class="container mx-auto p-4 md:p-8">
+                <div id="tutor-view" class="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg">
+                    <div id="chat-container" class="overflow-y-auto mb-4 p-4 bg-gray-100/80 rounded-lg chat-container">
+                        <!-- Chat messages will appear here -->
+                    </div>
+                    <div id="interaction-area">
+                        <!-- User interaction elements (buttons, text input) will go here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    const dashboardTheme = {
+        name: 'dashboard',
+        symbols: ['✏️', '🎓', '💡', '📚', '🧠', '✍️']
+    };
+
+    const standardsData = [
+        {
+            id: 1,
+            title: "Listening and Speaking",
+            description: "Listen and speak effectively in a variety of situations.",
+            theme: { name: 'communication', symbols: ['💬', '🎤', '🗣️', '🎧', '🤝'] },
+            content: [
+                { type: 'tutor', message: "Hi there! I'm Gemini, your ELA tutor. Let's start with Standard 1: Listening and Speaking. This is all about how we communicate effectively." },
+                { type: 'tutor', message: "First, let's talk about **active listening**. This means paying full attention to the speaker, understanding their message, and responding thoughtfully. It's more than just hearing words!", concept: 'active listening' },
+                { type: 'tutor', message: "Imagine your friend is telling you about a problem they're having. What's a good example of active listening?" },
+                { type: 'mcq', question: "What's a good example of active listening?", options: ["Interrupting to share your own story.", "Nodding along while looking at your phone.", "Asking clarifying questions like, 'So you felt frustrated when that happened?'", "Waiting for them to finish so you can talk."], answer: 2, feedback: "Exactly! Asking clarifying questions shows you're engaged and trying to understand their perspective. The other options are examples of poor listening habits." },
+                { type: 'tutor', message: "Great job! Now let's think about speaking. When giving a presentation, it's important to support your main idea with evidence. This makes your argument stronger." },
+                { type: 'tutor', message: "Let's say you're giving a presentation on why dogs are great pets. Which of these is the strongest piece of evidence?"},
+                { type: 'mcq', question: "Which is the strongest evidence?", options: ["My dog is really cute.", "Studies have shown that dog owners have lower stress levels.", "Everyone I know loves dogs.", "Dogs have been in movies."], answer: 1, feedback: "You got it! Citing scientific studies is a powerful form of evidence that is more persuasive than personal opinions or anecdotes." },
+                { type: 'tutor', message: "You've completed the basics of Listening and Speaking! You're on your way to becoming a master communicator." }
+            ]
+        },
+        {
+            id: 2,
+            title: "Reading and Writing Process",
+            description: "Use a variety of recursive reading and writing processes.",
+            theme: { name: 'library', symbols: ['📚', '📝', '✒️', '📖', '📜'] },
+            content: [
+                { type: 'tutor', message: "Welcome to Standard 2: The Reading and Writing Process! Think of writing not as a straight line, but as a cycle. We call this the 'recursive' writing process." },
+                { type: 'tutor', message: "It includes prewriting, drafting, revising, editing, and publishing. You might move back and forth between these stages." },
+                { type: 'tutor', message: "**Revising vs. editing** are not the same! **Revising** is about improving the ideas and organization (the big picture). **Editing** is about correcting grammar and spelling (the details).", concept: 'revising vs. editing' },
+                { type: 'mcq', question: "Which of the following is a **revising** task?", options: ["Fixing a spelling mistake.", "Adding a topic sentence to a paragraph.", "Changing a comma to a semicolon.", "Correcting a capitalization error."], answer: 1, feedback: "That's right! Adding a topic sentence improves the organization and clarity of the paragraph, which is a big-picture revision. The other tasks are all part of the editing stage." },
+                { type: 'tutor', message: "Excellent! A key skill is being able to **paraphrase**. This means putting a passage into your own words without changing the original meaning." },
+                { type: 'tutor', message: "Let's try one. Here's a sentence: 'The ancient mariner, with his long grey beard and glittering eye, held the wedding guest spellbound.' How would you paraphrase this?" },
+                { type: 'paraphrase', original: "The ancient mariner, with his long grey beard and glittering eye, held the wedding guest spellbound.", question: "Paraphrase the sentence above." },
+                { type: 'tutor', message: "You've successfully navigated the Reading and Writing Process! Keep practicing these skills in all your reading and writing." }
+            ]
+        },
+        {
+            id: 3,
+            title: "Critical Reading and Writing",
+            description: "Apply critical thinking skills to reading and writing.",
+            theme: { name: 'detective', symbols: ['🔎', '🤔', '💡', '❓', '🕵️'] },
+            content: [
+                { type: 'tutor', message: "Ready for a challenge? Welcome to Standard 3: Critical Reading and Writing. Here, we'll dive deeper into analyzing texts." },
+                { type: 'tutor', message: "Let's talk about **situational irony**. This is when the outcome of a situation is the opposite of what you'd expect.", concept: 'situational irony' },
+                { type: 'mcq', question: "Which of these is an example of situational irony?", options: ["A pilot having a fear of heights.", "A dog chasing a cat.", "A student studying for a test.", "A sad movie making you cry."], answer: 0, feedback: "Perfect! You would expect a pilot to be comfortable with heights, so this is a classic example of situational irony. The outcome is the opposite of what's expected." },
+                { type: 'tutor', message: "Now for writing. In an **argumentative essay**, you must acknowledge **counterclaims** - the opposing viewpoint.", concept: 'counterclaims' },
+                { type: 'mcq', question: "Why is it important to acknowledge a counterclaim?", options: ["To make your essay longer.", "To show you don't really believe your own argument.", "To show you have considered other perspectives, which strengthens your own argument.", "To confuse the reader."], answer: 2, feedback: "Exactly! Addressing the opposition shows that you are a fair-minded and knowledgeable writer, which makes your own claim more convincing." },
+                { type: 'tutor', message: "You're thinking like a true critic! Keep digging deep into the texts you read and write." }
+
+            ]
+        },
+        { id: 4, title: "Vocabulary", description: "Expand and apply spoken and reading vocabularies.", theme: { name: 'word-storm', symbols: ['A', 'b', 'C', 'd', 'E'] } },
+        { id: 5, title: "Language", description: "Apply knowledge of grammar, usage, mechanics, and style.", theme: { name: 'blueprint', symbols: ['¶', '§', '!', ';', ':'] } },
+        { id: 6, title: "Research", description: "Engage in inquiry to acquire, refine, and communicate information.", theme: { name: 'connections', symbols: ['🔗', '🌐', '→', '📊', '📈'] } },
+        { id: 7, title: "Multimodal Literacies", description: "Comprehend and communicate through various content forms.", theme: { name: 'media', symbols: ['🖼️', '🎵', '🎞️', '🕹️', '📱'] } },
+        { id: 8, title: "Independent Reading and Writing", description: "Read and write independently for a variety of purposes.", theme: { name: 'galaxy', symbols: ['⭐', '✨', '🚀', '🪐', '🌠'] } }
+    ];
+
+    const app = document.getElementById('app');
+    const dashboard = document.getElementById('dashboard');
+    const tutorModule = document.getElementById('tutor-module');
+    const standardsGrid = document.getElementById('standards-grid');
+    const moduleTitle = document.getElementById('module-title');
+    const backToDashboard = document.getElementById('back-to-dashboard');
+    const chatContainer = document.getElementById('chat-container');
+    const interactionArea = document.getElementById('interaction-area');
+    const backgroundContainer = document.getElementById('background-container');
+
+    let currentStandard = null;
+    let currentStep = 0;
+    let progress = {};
+
+    // --- Gemini API Function ---
+    async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+        const apiKey = ""; // Canvas will provide this
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                if (response.status === 429 && retries > 0) {
+                    console.warn(`Rate limited. Retrying in ${delay}ms...`);
+                    await new Promise(res => setTimeout(res, delay));
+                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                }
+                throw new Error(`API responded with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                return candidate.content.parts[0].text;
+            } else {
+                return "I'm not sure how to respond to that. Let's try something else.";
+            }
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            return "Sorry, I'm having trouble connecting. Please try again in a moment.";
+        }
+    }
+
+
+    function init() {
+        loadProgress();
+        renderDashboard();
+        updateBackground(dashboardTheme);
+        backToDashboard.addEventListener('click', showDashboard);
+    }
+
+    function loadProgress() {
+        const savedProgress = localStorage.getItem('elaTutorProgress');
+        if (savedProgress) {
+            progress = JSON.parse(savedProgress);
+        } else {
+            standardsData.forEach(std => progress[std.id] = 0);
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem('elaTutorProgress', JSON.stringify(progress));
+    }
+
+    function updateBackground(theme) {
+        backgroundContainer.innerHTML = '';
+        if (!theme || !theme.symbols) {
+            backgroundContainer.classList.remove('visible');
+            return;
+        }
+
+        for (let i = 0; i < 20; i++) {
+            const el = document.createElement('div');
+            el.className = 'bg-element';
+            el.textContent = theme.symbols[Math.floor(Math.random() * theme.symbols.length)];
+            el.style.left = `${Math.random() * 100}vw`;
+            el.style.animationDuration = `${15 + Math.random() * 30}s`;
+            el.style.animationDelay = `${Math.random() * -45}s`;
+            el.style.fontSize = `${20 + Math.random() * 40}px`;
+            backgroundContainer.appendChild(el);
+        }
+        backgroundContainer.classList.add('visible');
+    }
+
+    function renderDashboard() {
+        standardsGrid.innerHTML = '';
+        standardsData.forEach(standard => {
+            const isCompleted = progress[standard.id] === 100;
+            const card = document.createElement('div');
+            card.className = `standard-card bg-white p-6 rounded-lg shadow-md cursor-pointer flex flex-col justify-between ${isCompleted ? 'border-4 border-green-400' : ''}`;
+            card.innerHTML = `
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                         <h3 class="text-xl font-bold text-gray-900">${standard.title}</h3>
+                         ${isCompleted ? `<div class="text-green-500 font-bold">✓</div>` : ''}
+                    </div>
+                    <p class="text-gray-600">${standard.description}</p>
+                </div>
+                <div class="mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${progress[standard.id] || 0}%"></div>
+                    </div>
+                </div>
+            `;
+            if (standard.content) {
+                card.addEventListener('click', () => startModule(standard));
+            } else {
+                card.style.cursor = 'not-allowed';
+                card.style.opacity = '0.5';
+            }
+            standardsGrid.appendChild(card);
+        });
+    }
+
+    function startModule(standard) {
+        currentStandard = standard;
+        currentStep = 0;
+        moduleTitle.textContent = standard.title;
+        dashboard.classList.add('hidden');
+        tutorModule.classList.remove('hidden');
+        updateBackground(standard.theme);
+        chatContainer.innerHTML = '';
+        nextStep();
+    }
+
+    function showDashboard() {
+        tutorModule.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        updateBackground(dashboardTheme);
+        renderDashboard();
+    }
+    
+    function nextStep() {
+        const currentProgress = (currentStep / currentStandard.content.length) * 100;
+        progress[currentStandard.id] = Math.floor(currentProgress);
+
+        if (currentStep >= currentStandard.content.length) {
+            progress[currentStandard.id] = 100;
+            saveProgress();
+            showCompletionMessage();
+            return;
+        }
+        
+        saveProgress();
+
+        const stepData = currentStandard.content[currentStep];
+        interactionArea.innerHTML = '';
+
+        switch (stepData.type) {
+            case 'tutor':
+                addTutorMessage(stepData.message, stepData.concept);
+                currentStep++;
+                setTimeout(nextStep, 1000); 
+                break;
+            case 'mcq':
+                addTutorMessage(stepData.question);
+                renderMCQ(stepData);
+                break;
+            case 'paraphrase':
+                 renderParaphrase(stepData);
+                 break;
+        }
+    }
+
+    function addTutorMessage(message, concept = null) {
+        const bubble = document.createElement('div');
+        bubble.className = 'tutor-chat-bubble p-4 max-w-lg mb-4 animate__animated animate__fadeInUp';
+        
+        let content = `<p>${message}</p>`;
+        if (concept) {
+            const button = document.createElement('button');
+            button.className = 'gemini-button';
+            button.innerHTML = `✨ Explain this another way`;
+            button.onclick = () => handleExplainDifferently(concept, button);
+            
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            wrapper.appendChild(button);
+            bubble.appendChild(wrapper);
+        } else {
+            bubble.innerHTML = content;
+        }
+        
+        chatContainer.appendChild(bubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function handleExplainDifferently(concept, button) {
+        button.disabled = true;
+        button.innerHTML = `✨ Thinking... <div class="loader"></div>`;
+        const prompt = `Please explain the ELA concept of "${concept}" in a new and different way for an 8th grader. Use a unique example.`;
+        const response = await callGeminiAPI(prompt);
+        addTutorMessage(response);
+        button.disabled = false;
+        button.innerHTML = `✨ Explain this another way`;
+    }
+    
+    function addUserMessage(message) {
+        const bubble = document.createElement('div');
+        bubble.className = 'user-chat-bubble p-4 max-w-lg mb-4 ml-auto animate__animated animate__fadeInUp';
+        bubble.innerHTML = `<p>${message}</p>`;
+        chatContainer.appendChild(bubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    function renderMCQ(stepData) {
+        const form = document.createElement('div');
+        form.className = 'space-y-3';
+        stepData.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'w-full text-left p-3 bg-gray-200 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400';
+            button.textContent = option;
+            button.onclick = () => handleMCQAnswer(index, stepData);
+            form.appendChild(button);
+        });
+        interactionArea.appendChild(form);
+    }
+    
+    function handleMCQAnswer(selectedIndex, stepData) {
+        addUserMessage(stepData.options[selectedIndex]);
+        interactionArea.innerHTML = ''; 
+        setTimeout(() => {
+            addTutorMessage(stepData.feedback);
+             if(selectedIndex === stepData.answer){
+                currentStep++;
+             }
+             setTimeout(nextStep, 2000);
+        }, 500);
+    }
+    
+    function renderParaphrase(stepData) {
+        const form = document.createElement('form');
+        form.className = 'flex flex-col gap-2';
+        form.innerHTML = `
+            <textarea id="text-input" class="w-full p-2 border border-gray-300 rounded-lg" rows="4" placeholder="Type your paraphrase here..."></textarea>
+            <button type="submit" class="p-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold">✨ Check with AI Tutor</button>
+        `;
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            handleParaphraseAnswer(stepData);
+        };
+        interactionArea.appendChild(form);
+        document.getElementById('text-input').focus();
+    }
+
+    async function handleParaphraseAnswer(stepData) {
+        const input = document.getElementById('text-input');
+        const userAnswer = input.value.trim();
+        if (userAnswer) {
+            addUserMessage(userAnswer);
+            interactionArea.innerHTML = `<div class="text-center p-4">✨ Gemini is reading your paraphrase... <div class="loader inline-block"></div></div>`;
+            const prompt = `An 8th-grade student was asked to paraphrase the sentence: "${stepData.original}". They wrote: "${userAnswer}". Please evaluate their paraphrase. Is it accurate? Does it use their own words? Provide brief, encouraging, and constructive feedback directly to the student.`;
+            const response = await callGeminiAPI(prompt);
+            
+            addTutorMessage(response);
+            currentStep++;
+            setTimeout(nextStep, 2000);
+        }
+    }
+    
+    function showCompletionMessage() {
+        addTutorMessage(`🎉 Congratulations! You've completed the module for **${currentStandard.title}**! Keep up the great work. You can return to the dashboard to select another standard.`);
+        interactionArea.innerHTML = `
+            <button id="completion-back-btn" class="w-full p-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+                Back to Dashboard
+            </button>
+        `;
+        document.getElementById('completion-back-btn').onclick = showDashboard;
+    }
+
+    init();
+    </script>
+
+</body>
+</html>
+
